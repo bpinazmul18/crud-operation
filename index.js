@@ -1,11 +1,17 @@
 const Joi = require('joi');
-const express = require('express')
+const express = require('express');
+const logger = require('./logger');
+const auth = require('./auth')
 const app = express()
 
 const port = process.env.PORT || 3001
 
 // Middleware
 app.use(express.json())
+
+// practice middleware
+app.use(logger)
+app.use(auth)
 
 // Data
 const courses = [
