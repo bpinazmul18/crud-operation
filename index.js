@@ -64,13 +64,26 @@ app.put("/api/courses/:id", (req, res) => {
     course.name = value['name']
 
     // Response to the client
-    res.send(course)
+    res.send(JSON.stringify(course))
 })
 
 app.get('/api/courses/:id', (req, res) => {
     // Find user by ID
     const course = courses.find(c => c.id === parseInt(req.params.id))
     if(!course) res.status(404).send('Course was not found by given ID!')
+
+    // Response to the client
+    res.send(JSON.stringify(course))
+})
+
+app.delete('/api/courses/:id', (req, res) => {
+    // Find user by ID
+    const course = courses.find(c => c.id === parseInt(req.params.id))
+    if(!course) res.status(404).send('Course was not found by given ID!')
+
+    // Delete course
+    const index = courses.indexOf(course)
+    courses.splice(index, 1)
 
     // Response to the client
     res.send(JSON.stringify(course))
