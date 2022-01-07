@@ -7,8 +7,12 @@
     "start": "nodemon index"
   },
   "dependencies": {
+    "config": "^3.3.6",
+    "debug": "^4.3.3",
     "express": "^4.17.2",
-    "joi": "^17.5.0"
+    "helmet": "^5.0.1",
+    "joi": "^17.5.0",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

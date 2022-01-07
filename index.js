@@ -1,18 +1,37 @@
-const Joi = require('joi');
-const express = require('express');
-const logger = require('./logger');
+const debug = require('debug')('app:startup')
+const config = require('config')
+const Joi = require('joi')
+const morgan = require('morgan')
+const helmet = require('helmet')
+const express = require('express')
+const logger = require('./logger')
 const auth = require('./auth')
 const app = express()
 
 const port = process.env.PORT || 3001
 
+console.log(`Node env: ${process.env.NODE_ENV}`)
+console.log(`NODE_ENV: ${app.get('env')}`)
+
 // Middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true}))
 
+app.use(express.static('public'))
+
 // practice middleware
-app.use(logger)
-app.use(auth)
+// app.use(logger)
+// app.use(auth)
+app.use(helmet())
+if(app.get('env') === 'development') {
+    app.use(morgan('tiny'))
+    debug('Morgan enable...')
+}
+
+// Configuration
+console.log('Application name: ' + config.get('name'))
+console.log('Application mail server: ' + config.get('mail.host'))
+console.log("Application mail password: " + config.get('mail.password'))
 
 // Data
 const courses = [
@@ -97,3 +116,7 @@ app.delete('/api/courses/:id', (req, res) => {
 })
 
 app.listen(port, ()=> console.log(`App listening on port http://localhost:${port}`))
+
+
+
+
