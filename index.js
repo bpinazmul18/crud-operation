@@ -1,77 +1,79 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000
+const Joi = require('joi');
+const express = require('express')
+const app = express()
 
-// Enable body json
+const port = process.env.PORT || 3001
+
+// Middleware
 app.use(express.json())
 
-// Index page
-app.get('/', (req, res) => {
-    res.send('Hello world.')
-})
-
+// Data
 const courses = [
-    {
-        id: 1,
-        name: 'course 1'
-    },
-    {
-        id: 2,
-        name: 'course 2'
-    },
-    {
-        id: 3,
-        name: 'course 3'
-    },
-    {
-        id: 4,
-        name: 'course 4'
-    }
-
+    {id: 1, name: 'Javascript'},
+    {id: 2, name: 'Java'},
+    {id: 3, name: 'Python'},
+    {id: 4, name: 'PHP'}
 ]
 
-// All courses
+// Validateion
+const validation = (course) => {
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    })
+
+    return schema.validate({name: course})
+}
+
+// aoiEndPoint
+app.get('/', (req, res) => {
+    res.send('Hello world')
+})
+
 app.get('/api/courses', (req, res) => {
-    res.status(200).send(JSON.stringify(courses))
+    res.send(JSON.stringify(courses))
 })
 
-// Course by id
-app.get('/api/courses/:id', (req, res) => {
-    let course = courses.find(c => c.id === parseInt(req.params.id))
-    if(!course) return res.status(404).send("Cann't find by given id!")
-    res.status(200).send(JSON.stringify(course))
-})
-
-// Add new course
 app.post('/api/courses', (req, res) => {
+    // Validate input field
+    const {error, value} = validation(req.body.name)
+    if(error) return res.status(400).send(error['details'][0].message)
 
+    // New course
     const course = {
         id: courses.length + 1,
-        name: req.body.name
+        name: value['name']
     }
 
-    if (!req.body.name) return res.status(400).send("Name cann't be empty!")
+    // Add to database
+    courses.push(course)
 
-    res.status(201).send(course)
-})
-// Remove course by id
-app.delete('/api/courses/:id', (req, res) => {
-    let index = courses.find(c => c.id === parseInt(req.params.id))
-    if(!index < -1) return res.status(400).send("Cann't find by given id!")
-    console.log(index < -1)
-    if(index) return courses.splice(index, 1)
-    res.status(200).send(JSON.stringify(courses))
+    // Response to the client
+    res.send(JSON.stringify(course))
 })
 
-app.put('/api/courses/:id', (req, res) => {
-    let course = courses.find(c => c.id === parseInt(req.params.id))
-    if(!course) return res.status(404).send("Cann't find by given id!")
+app.put("/api/courses/:id", (req, res) => {
+    // Find course by ID
+    const course = courses.find(c => c.id === parseInt(req.params.id))
+    if(!course) res.status(404).send('Course was not found by given ID!')
 
-    course.name = req.body.name
+    // Get data by ID and validate input field
+    const {error, value} = validation(req.body.name)
+    if(error) return res.status(400).send(error['details'][0].message)
 
-    res.status(200).send(JSON.stringify(courses))
+    // Update courese
+    course.name = value['name']
+
+    // Response to the client
+    res.send(course)
 })
 
-app.listen(PORT, () => {
-    console.log(`Successfully listening server on port ${PORT}`)
+app.get('/api/courses/:id', (req, res) => {
+    // Find user by ID
+    const course = courses.find(c => c.id === parseInt(req.params.id))
+    if(!course) res.status(404).send('Course was not found by given ID!')
+
+    // Response to the client
+    res.send(JSON.stringify(course))
 })
+
+app.listen(port, ()=> console.log(`App listening on port http://localhost:${port}`))
